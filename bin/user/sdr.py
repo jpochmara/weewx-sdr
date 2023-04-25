@@ -1188,6 +1188,12 @@ class EcoWittWH40Packet(Packet):
         pkt['usUnits'] = weewx.METRICWX
         pkt['station_id'] = obj.get('id')
         pkt['rain_total'] = Packet.get_float(obj, 'rain_mm')
+        pkt['battery'] = 0 if Packet.get_int(obj, 'battery_ok') > 0.10 else 1
+        pkt['supplyVoltage'] = Packet.get_float(obj, 'battery_V')
+        pkt['rssi'] = Packet.get_float(obj, 'rssi')
+        pkt['snr'] = Packet.get_float(obj, 'snr')
+        pkt['noise'] = Packet.get_float(obj, 'noise')
+
         return EcoWittWH40Packet.insert_ids(pkt)
 
     @staticmethod
