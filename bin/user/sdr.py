@@ -1761,6 +1761,63 @@ class FOWH65BAltPacket(Packet):
         station_id = pkt.pop('station_id', '0000')
         return Packet.add_identifiers(pkt, station_id, FOWH65BAltPacket.__name__)
 
+class FineoffsetWS90Packet(Packet):
+    #
+    #
+    #
+
+    # time : 2020-04-26 23:21:42
+    # model : Fineoffset-WS90
+    # id : 16
+    # temperature_C : 15.400
+    # humidity : 51
+    # wind_dir_deg : 323
+    # wind_avg_m_s : 1.020
+    # wind_max_m_s : 2.040
+    # rain_mm : 76.453
+    # uvi : 2
+    # light_lux : 14616.000
+    # supercap_V: 3.200
+    # battery_ok: OK
+    # battery_mV: 3280
+    # mic : CRC
+
+    # {"time" : "2023-03-08 22:00:38", "model" : "Fineoffset-WS90", "id" : 13355, "battery_ok" : 1.0, "battery_mV" : 3280, "temperature_C" : 5.700, "humidity" : 75, "wind_dir_deg" : 87, "wind_avg_m_s" : 1.300, "wind_max_m_s" : 1.600, "uvi" : 0.000, "light_lux" : 55300.000, "flags" : 129, "rain_mm" : 12.800, "supercap_V" : 3.200, "data" : "01c00000192000fe7ff0ff0082", "mic" : "CRC", "mod" : "FSK", "freq1" : 914.945, "freq2" : 915.039, "rssi" : -0.123, "snr" : 32.990, "noise" : -33.113}
+
+    IDENTIFIER = "Fineoffset-WS90"
+    @staticmethod
+    def parse_json(obj):
+        pkt = dict()
+        pkt['dateTime'] = Packet.parse_time(obj.get('time'))
+        pkt['usUnits'] = weewx.METRICWX
+        pkt['station_id'] = obj.get('id')
+        pkt['temperature'] = Packet.get_float(obj, 'temperature_C')
+        pkt['humidity'] = Packet.get_float(obj, 'humidity')
+        pkt['wind_dir'] = Packet.get_float(obj, 'wind_dir_deg')
+        pkt['wind_speed'] = Packet.get_float(obj, 'wind_avg_m_s')
+        pkt['wind_gust'] = Packet.get_float(obj, 'wind_max_m_s')
+        pkt['rain_total'] = Packet.get_float(obj, 'rain_mm')
+        pkt['uv_index'] = Packet.get_float(obj, 'uvi')
+        pkt['light'] = Packet.get_float(obj, 'light_lux') # superfluous?
+        pkt['battery'] = 0 if Packet.get_int(obj, 'battery_ok') > 0.1 else 1
+
+        v = Packet.get_float(obj, 'battery_mV')
+        v = round( v * .001, 2 )
+        pkt['supplyVoltage'] = v
+
+        pkt['referenceVoltage'] = Packet.get_float(obj, 'supercap_V')
+        pkt['freq1'] = Packet.get_float(obj, 'freq1')
+        pkt['freq2'] = Packet.get_float(obj, 'freq2')
+        pkt['rssi'] = Packet.get_float(obj, 'rssi')
+        pkt['snr'] = Packet.get_float(obj, 'snr')
+        pkt['noise'] = Packet.get_float(obj, 'noise')
+        return FineoffsetWS90Packet.insert_ids(pkt)
+
+    @staticmethod
+    def insert_ids(pkt):
+        station_id = pkt.pop('station_id', '0000')
+        return Packet.add_identifiers(pkt, station_id, FineoffsetWS90Packet.__name__)
+
 
 class FOWH0290Packet(Packet):
     # This is for a WH0290 Air Quality Monitor (Ambient Weather PM25)
